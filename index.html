@@ -1,13 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Smart Multi Finance</title>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Multi Finance - Kalkulator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #065f46 0%, #064e3b 100%); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans">
+
+    <div class="gradient-bg text-white py-8 px-4 text-center shadow-lg">
+        <h1 class="text-3xl font-extrabold tracking-tight">Smart Multi Finance</h1>
+        <p class="mt-2 text-emerald-100 opacity-90">Simulasi Kredit Cepat & Aman</p>
+    </div>
+
+    <div class="max-w-md mx-auto -mt-6 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl p-6 border border-slate-100">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                💰 Simulasi Pinjaman
+            </h2>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-2">Pilih Jaminan</label>
+                    <select id="jaminan" class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <option value="BPKB Mobil">BPKB Mobil</option>
+                        <option value="BPKB Motor">BPKB Motor</option>
+                        <option value="Sertifikat">Sertifikat Rumah/Tanah</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-600 mb-2">Nominal Pinjaman</label>
+                    <input type="number" id="nominal" placeholder="Contoh: 10000000" 
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+
+                <div class="pt-4 border-t border-dashed border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Data Pemohon</h3>
+                    <input type="text" id="nama" placeholder="Nama Lengkap" 
+                        class="w-full p-4 mb-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                    <input type="tel" id="whatsapp" placeholder="Nomor WhatsApp (08xxx)" 
+                        class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                </div>
+
+                <button onclick="kirimData()" id="btnKirim"
+                    class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-5 rounded-2xl shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                    Dapatkan Pinjaman Sekarang 🚀
+                </button>
+            </div>
+        </div>
+
+        <p class="text-center text-slate-400 text-xs mt-8">
+            © 2024 Smart Multi Finance. Terdaftar & Diawasi oleh OJK.
+        </p>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyC-feFghP9QK54WihVVFcX4rKoJUicJooU",
+            authDomain: "smart-finance-be995.firebaseapp.com",
+            projectId: "smart-finance-be995",
+            storageBucket: "smart-finance-be995.firebasestorage.app",
+            messagingSenderId: "217870762206",
+            appId: "1:217870762206:web:037d8b132197a255f0424f"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        async function kirimData() {
+            const btn = document.getElementById('btnKirim');
+            const nama = document.getElementById('nama').value;
+            const wa = document.getElementById('whatsapp').value;
+            const jaminan = document.getElementById('jaminan').value;
+            const nominal = document.getElementById('nominal').value;
+
+            if(!nama || !wa) {
+                alert("Mohon lengkapi Nama dan WhatsApp!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Memproses...";
+
+            try {
+                // Simpan ke Firestore Database Anda
+                await db.collection("leads").add({
+                    nama: nama,
+                    whatsapp: wa,
+                    jaminan: jaminan,
+                    nominal: nominal,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Kirim ke WhatsApp Admin
+                const pesan = `Halo Admin, saya ${nama}. Ingin mengajukan pinjaman ${jaminan} sebesar Rp${nominal}. Mohon dibantu.`;
+                const linkWA = `https://wa.me/6281315574375?text=${encodeURIComponent(pesan)}`;
+                
+                window.location.href = linkWA;
+            } catch (error) {
+                console.error("Error: ", error);
+                alert("Terjadi kesalahan, coba lagi nanti.");
+                btn.disabled = false;
+                btn.innerText = "Dapatkan Pinjaman Sekarang 🚀";
+            }
+        }
+    </script>
+</body>
 </html>
